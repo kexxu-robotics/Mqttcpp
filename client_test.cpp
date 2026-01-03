@@ -13,7 +13,8 @@ void run_test_scenario() {
   // assumes you have a broker running on port 1883
 
   // Test 1: Client multipli
-  std::cout << "\n=== TEST 1: Multiple Clients ===\n";
+  std::println();
+  std::println("=== TEST 1: Multiple Clients ===");
 
   std::vector<std::unique_ptr<MqttClient>> clients;
 
@@ -26,10 +27,7 @@ void run_test_scenario() {
         std::string message(std::from_range, payload);
         std::println(
             "on_message QOS_0 with topic: {}, QoS: {}, retain: {}, message: {}", 
-            topic, 
-            qos,
-            retain,
-            message
+            topic, qos, retain, message
           );
       });
 
@@ -54,70 +52,79 @@ void run_test_scenario() {
   }
 
   // Test 2: QoS Levels
-  std::cout << "\n=== TEST 2: QoS Levels ===\n";
+  std::println();
+  std::println("=== TEST 2: QoS Levels ===");
 
   publisher.publish("test/qos0", "QoS 0 message", QOS_0);
   publisher.publish("test/qos1", "QoS 1 message", QOS_1);
   publisher.publish("test/qos2", "QoS 2 message", QOS_2);
 
-//    // Test 3: Retained Messages
-//    std::cout << "\n=== TEST 3: Retained Messages ===\n";
-//
-//    publisher.publish("test/retained", "This is retained", QOS_1, true);
-//
-//    // Nuovo subscriber dovrebbe ricevere il messaggio retained
-//    std::this_thread::sleep_for(std::chrono::seconds(1));
-//    MqttClient late_subscriber("late_subscriber");
-//    late_subscriber.set_message_handler(
-//        [](const std::string& topic, const std::vector<uint8_t>& payload) {
-//            std::string msg(payload.begin(), payload.end());
-//            std::cout << "[LATE_SUB] Retained message: " << topic << ": " << msg << std::endl;
-//        }
-//    );
-//
-//    if (late_subscriber.connect("localhost", 1883)) {
-//        late_subscriber.subscribe("test/retained", QOS_0);
-//    }
-//
-//    // Test 4: Wildcards
-//    std::cout << "\n=== TEST 4: Wildcard Subscriptions ===\n";
-//
-//    MqttClient wildcard_client("wildcard_sub");
-//    wildcard_client.set_message_handler(
-//        [](const std::string& topic, const std::vector<uint8_t>& payload) {
-//            std::string msg(payload.begin(), payload.end());
-//            std::cout << "[WILDCARD] " << topic << ": " << msg << std::endl;
-//        }
-//    );
-//
-//    if (wildcard_client.connect("localhost", 1883)) {
-//        wildcard_client.subscribe("sensors/+/temperature", QOS_0);
-//        wildcard_client.subscribe("logs/#", QOS_0);
-//
-//        // Pubblica su vari topic
-//        publisher.publish("sensors/room1/temperature", "22°C", QOS_0);
-//        publisher.publish("sensors/room2/temperature", "24°C", QOS_0);
-//        publisher.publish("sensors/room1/humidity", "60%", QOS_0); // Non dovrebbe essere ricevuto
-//        publisher.publish("logs/error/app", "Error occurred", QOS_0);
-//        publisher.publish("logs/info/system", "System started", QOS_0);
-//    }
-//
-//    std::cout << "\nPress Enter to finish tests...\n";
-//    std::cin.get();
+  // Test 3: Retained Messages
+  std::println();
+  std::println("=== TEST 3: Retained Messages ===");
+
+  publisher.publish("test/retained", "This is retained", QOS_1, true);
+
+  // Nuovo subscriber dovrebbe ricevere il messaggio retained
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  MqttClient late_subscriber("late_subscriber");
+  late_subscriber.set_message_handler(
+    [](const std::string& topic, const std::vector<uint8_t>& payload, QoS qos, bool retain) {
+      std::string message(std::from_range, payload);
+      std::println(
+          "[LATESUB] on_message QOS_0 with topic: {}, QoS: {}, retain: {}, message: {}", 
+          topic, qos, retain, message
+        );
+    });
+
+  if (late_subscriber.connect("localhost", 1883)) {
+      late_subscriber.subscribe("test/retained", QOS_0);
+  }
+
+  // Test 4: Wildcards
+  std::println();
+  std::println("=== TEST 4: Wildcard Subscriptions ===");
+
+  MqttClient wildcard_client("wildcard_sub");
+  wildcard_client.set_message_handler(
+    [](const std::string& topic, const std::vector<uint8_t>& payload, QoS qos, bool retain) {
+      std::string message(std::from_range, payload);
+      std::println(
+          "[WILDCARD] on_message QOS_0 with topic: {}, QoS: {}, retain: {}, message: {}", 
+          topic, qos, retain, message
+        );
+    });
+
+  if (wildcard_client.connect("localhost", 1883)) {
+      wildcard_client.subscribe("sensors/+/temperature", QOS_0);
+      wildcard_client.subscribe("logs/#", QOS_0);
+
+      // Pubblica su vari topic
+      publisher.publish("sensors/room1/temperature", "22°C", QOS_0);
+      publisher.publish("sensors/room2/temperature", "24°C", QOS_0);
+      publisher.publish("sensors/room1/humidity", "60%", QOS_0); // Non dovrebbe essere ricevuto
+      publisher.publish("logs/error/app", "Error occurred", QOS_0);
+      publisher.publish("logs/info/system", "System started", QOS_0);
+  }
+
+  std::println();
+  std::println("Press Enter to finish tests...");
+  std::cin.get();
 }
 
 int main() {
-    std::cout << "=================================\n";
-    std::cout << "    OurMQTT Complete Test Suite\n";
-    std::cout << "=================================\n\n";
+  std::println("=================================");
+  std::println("    OurMQTT Complete Test Suite");
+  std::println("=================================");
+  std::println();
 
-    try {
-        run_test_scenario();
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Test failed: " << e.what() << std::endl;
-        return 1;
-    }
+  try {
+      run_test_scenario();
+  }
+  catch (const std::exception& e) {
+      std::println(std::cerr, "Test failed: {}", e.what());
+      return 1;
+  }
 
-    return 0;
+  return 0;
 }
