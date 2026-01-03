@@ -41,6 +41,7 @@
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
 #include <openssl/aes.h>
+#include <sys/stat.h> // chmod
 #endif
 
 #include "logger.hpp"

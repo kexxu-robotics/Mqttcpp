@@ -12,6 +12,8 @@
 #include <functional>
 #include <stdexcept>
 #include <cstring>
+#include <format>
+#include <string_view>
 
 namespace ourmqtt {
 
@@ -48,7 +50,6 @@ namespace ourmqtt {
         QOS_1 = 1,  // At least once
         QOS_2 = 2   // Exactly once
     };
-
     // MQTT 5.0 Property identifiers
     enum class PropertyId : uint8_t {
         PAYLOAD_FORMAT_INDICATOR = 0x01,
@@ -1617,5 +1618,21 @@ namespace ourmqtt {
     };
 
 } // namespace ourmqtt
+
+// Formatter for QoS, to use with std::format and std::println etc.
+namespace std {
+  template <>
+  struct std::formatter<ourmqtt::QoS> : std::formatter<std::string_view> {
+      auto format(ourmqtt::QoS q, format_context& ctx) const {
+          std::string_view name = "UNKNOWN";
+          switch (q) {
+            case ourmqtt::QOS_0: name = "QOS_0 (At most once)"; break;
+            case ourmqtt::QOS_1: name = "QOS_1 (At least once)"; break;
+            case ourmqtt::QOS_2: name = "QOS_2 (Exactly once)"; break;
+          }
+          return std::formatter<std::string_view>::format(name, ctx);
+      }
+  };
+}
 
 #endif // OUR_MQTT_PACKET_HPP

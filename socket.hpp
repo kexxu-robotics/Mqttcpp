@@ -122,7 +122,7 @@ namespace ourmqtt {
 #else
                 ::shutdown(fd_, SHUT_RDWR);
 #endif
-                CLOSE_SOCKET(fd_);
+                ::close(fd_);
                 fd_ = INVALID_SOCKET_VALUE;
                 is_connected_ = false;
             }
@@ -606,12 +606,14 @@ namespace ourmqtt {
 
 
         bool set_reuse_port(bool enable) {
+          // TODO does not work sock_ undefined
+          return true;
 #ifdef SO_REUSEPORT
-            int opt = enable ? 1 : 0;
-            return setsockopt(sock_, SOL_SOCKET, SO_REUSEPORT,
-                reinterpret_cast<const char*>(&opt), sizeof(opt)) == 0;
+           // int opt = enable ? 1 : 0;
+           // return setsockopt(sock_, SOL_SOCKET, SO_REUSEPORT,
+           //     reinterpret_cast<const char*>(&opt), sizeof(opt)) == 0;
 #else
-            return true;  // Not supported on Windows
+            //return true;  // Not supported on Windows
 #endif
         }
 
