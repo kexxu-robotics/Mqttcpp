@@ -1,4 +1,19 @@
 
+# Tested
+
+For this you need your own MQTT client for example Mosquitto or VerneMQ running with default port 1883 and no password protection.
+
+```bash
+mkdir build
+cd build
+g++ client_test.cpp -std=c++23 -pthread -lsqlite3 -lssl -lcrypto -o build/client_test
+./build/client_test
+```
+
+
+
+# Untested
+
 <p align="center">
   <img src="mqtcpp.png" alt="PolymCP Logo" width="600"/>
 </p>
